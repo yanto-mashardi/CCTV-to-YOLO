@@ -1,5 +1,4 @@
 # CCTV-to-YOLO
+Standalone real-time vehicle arrival counting for Bengkalis and Pakning. RTMP (OBS/Larix/CCTV) → MediaMTX VPS relay → RTSP/TCP → campus YOLO. No video recording by default, no ETA–ETD integration or queue logic. Only car and motorcycle classes counted in this phase.
 
-Standalone vehicle arrival event logger for Bengkalis and Pakning. No ETA–ETD integration in this phase. RTMP publishers (OBS, Larix, IP cameras) → MediaMTX on VPS → RTSP/TCP → YOLO on campus PC → CSV and JSON Lines per inbound vehicle crossing. No five-minute aggregation. Timestamp is campus observation time, not guaranteed camera capture time. No credentials or production deployment in GitHub.
-
-Development and deployment instructions will be in the project files. Do not modify existing ETA–ETD services; inspect live VPS ports first.
+Live JSON: overwritten atomically per event, reset at WIB midnight. Daily CSV: time and cumulative motorcycle/car counts per crossing, one file per port/day, local spool copied to Google Drive Desktop after day closes. No JSONL archive, no five-minute aggregation. Simulation and observed output separated. See docs/SETUP.md and docs/STORAGE.md. No credentials in GitHub; not deployed.

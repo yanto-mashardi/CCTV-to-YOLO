@@ -35,5 +35,6 @@
       "entry": "negative_to_positive",
       "source_status": "SIMULATION"
     }
-  ]
+  ],
+  "archive_env": "CCTV_GDRIVE_ARCHIVE"
 }
