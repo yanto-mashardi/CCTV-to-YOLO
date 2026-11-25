@@ -1,0 +1,2 @@
+# Native VPS relay deployment
+Pinned MediaMTX 1.15.0 matching existing compose. Standalone binary verified against GitHub release digest; stop if digest unavailable. Separate non-root systemd service and randomly generated per-path publish/read credentials. RTMP TCP 1935 and RTSP TCP 8554; no recording, transcoding or YOLO on VPS. Firewall rules are not changed automatically. RTMP URL query user/pass, RTSP user:pass@host. Plaintext protocols, restrict network access where possible. Actual stream test pending.
