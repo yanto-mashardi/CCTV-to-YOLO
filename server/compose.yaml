@@ -1,0 +1,9 @@
+services:
+  relay:
+    image: bluenviron/mediamtx:1.15.0
+    restart: unless-stopped
+    ports:
+      - "${RTMP_PORT:-1935}:1935/tcp"
+      - "${RTSP_PORT:-8554}:8554/tcp"
+    volumes:
+      - ./mediamtx.local.yml:/mediamtx.yml:ro

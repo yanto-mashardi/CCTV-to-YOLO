@@ -1,0 +1,39 @@
+logLevel: info
+rtsp: yes
+rtspAddress: :8554
+rtspTransports: [tcp]
+rtmp: yes
+rtmpAddress: :1935
+hls: no
+webrtc: no
+srt: no
+api: no
+metrics: no
+authMethod: internal
+authInternalUsers:
+  - user: bengkalis_pub
+    pass: REPLACE_BENGKALIS_PASSWORD
+    permissions:
+      - action: publish
+        path: bengkalis
+  - user: pakning_pub
+    pass: REPLACE_PAKNING_PASSWORD
+    permissions:
+      - action: publish
+        path: pakning
+  - user: campus_reader
+    pass: REPLACE_READER_PASSWORD
+    permissions:
+      - action: read
+        path: bengkalis
+      - action: read
+        path: pakning
+paths:
+  bengkalis:
+    source: publisher
+    overridePublisher: no
+    record: no
+  pakning:
+    source: publisher
+    overridePublisher: no
+    record: no

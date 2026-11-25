@@ -1,0 +1,39 @@
+{
+  "model": "yolo11n.pt",
+  "device": "cpu",
+  "output": "output",
+  "cameras": [
+    {
+      "name": "bengkalis",
+      "url_env": "BENGKALIS_RTSP",
+      "line": [
+        [
+          0.1,
+          0.6
+        ],
+        [
+          0.9,
+          0.6
+        ]
+      ],
+      "entry": "negative_to_positive",
+      "source_status": "SIMULATION"
+    },
+    {
+      "name": "pakning",
+      "url_env": "PAKNING_RTSP",
+      "line": [
+        [
+          0.1,
+          0.6
+        ],
+        [
+          0.9,
+          0.6
+        ]
+      ],
+      "entry": "negative_to_positive",
+      "source_status": "SIMULATION"
+    }
+  ]
+}
