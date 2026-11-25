@@ -33,8 +33,8 @@ class LatestFrame:
                 self.cv.notify_all()
     def read(self,seq):
         with self.cv:
-            self.cv.wait_for(lambda:self.closed or self.seq>seq,timeout=15)
-            if self.closed or self.seq<=seq: return None
+            self.cv.wait_for(lambda:self.closed or (self.frame is not None and self.seq>seq),timeout=15)
+            if self.closed or self.frame is None or self.seq<=seq: return None
             return self.seq,self.frame
     def release(self):
         self.stop=True
