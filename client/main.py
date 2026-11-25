@@ -5,6 +5,7 @@ import cv2
 from ultralytics import YOLO
 from counting import Counter
 from storage import DailyStore
+from runtime import LatestFrame, Validation, PreviewServer
 
 CLASSES = {2: "car", 3: "motorcycle"}
 
@@ -20,7 +21,7 @@ def maintenance(store, archive_root, stop):
             print(store.port, "storage/Drive maintenance:", type(exc).__name__, flush=True)
         stop.wait(1)
 
-def run_camera(cam, cfg):
+def run_camera(cam, cfg, validation):
     name = cam["name"]
     url = os.environ[cam["url_env"]]
     # Simulation outputs must never be mixed with actual research archives.
@@ -29,8 +30,8 @@ def run_camera(cam, cfg):
         raise ValueError("Invalid source_status")
     from pathlib import Path
     root = Path(cfg["output"]) / mode.lower()
-    archive = Path(os.environ[cfg["archive_env"]]) / mode.lower()
-    # The operator creates these Drive folders beforehand.
+    archive = Path(os.environ.get(cfg["archive_env"], cfg["archive_path"])) / mode.lower()
+    # Keep local spool even if Drive is unavailable.
     store = DailyStore(root, name)
     stop = threading.Event()
     worker = threading.Thread(target=maintenance, args=(store, archive, stop), daemon=True)
@@ -39,23 +40,33 @@ def run_camera(cam, cfg):
         while True:
             model = YOLO(cfg["model"])
             counter = Counter(cam["line"], cam["entry"])
-            cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG, [cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,10000,cv2.CAP_PROP_READ_TIMEOUT_MSEC,5000])
+            cap = LatestFrame(url)
+            seq = -1
+            last = 0.0
+            validation.status(name, "CONNECTING")
             try:
-                while cap.isOpened():
-                    ok, frame = cap.read()
-                    if not ok:
+                while True:
+                    item = cap.read(seq)
+                    if item is None:
                         break
-                    h,w = frame.shape[:2]
-                    result = model.track(frame, persist=True, tracker="bytetrack.yaml", classes=list(CLASSES), device=cfg["device"], verbose=False)[0]
-                    boxes = result.boxes
-                    if boxes is None or boxes.id is None:
+                    seq, frame = item
+                    now = time.monotonic()
+                    if now-last < 1/float(cfg["inference_fps"]):
                         continue
-                    for xy,tid,cls in zip(boxes.xyxy.cpu().tolist(),boxes.id.int().cpu().tolist(),boxes.cls.int().cpu().tolist()):
+                    last = now
+                    validation.status(name, "ONLINE")
+                    h,w = frame.shape[:2]
+                    result = model.track(frame, persist=True, tracker="bytetrack.yaml", classes=list(CLASSES), device=cfg["device"], conf=float(cam.get("confidence",cfg["confidence"])), verbose=False)[0]
+                    boxes = result.boxes
+                    if boxes is not None and boxes.id is not None:
+                      for xy,tid,cls in zip(boxes.xyxy.cpu().tolist(),boxes.id.int().cpu().tolist(),boxes.cls.int().cpu().tolist()):
                         point = ((xy[0]+xy[2])/(2*w), xy[3]/h)
                         if counter.update(tid, point, time.monotonic()):
                             print(name, store.add(CLASSES[cls]), flush=True)
+                    validation.frame(name, frame, result, cam["line"], store.state.copy())
             finally:
                 cap.release()
+                validation.status(name, "OFFLINE")
             print(name, "stream disconnected; retrying", flush=True)
             time.sleep(2)
     finally:
@@ -73,9 +84,11 @@ if __name__ == "__main__":
     for c in cams:
         if not os.environ.get(c["url_env"]):
             raise SystemExit("Missing " + c["url_env"])
-    if not os.environ.get(cfg["archive_env"]):
-        raise SystemExit("Missing " + cfg["archive_env"])
-    threads = [threading.Thread(target=run_camera,args=(c,cfg)) for c in cams]
+    validation = Validation(cfg["output"], cfg["preview_fps"])
+    server = PreviewServer(validation)
+    server.start()
+    print("Local validation: http://127.0.0.1:8765", flush=True)
+    threads = [threading.Thread(target=run_camera,args=(c,cfg,validation)) for c in cams]
     for t in threads:
         t.start()
     for t in threads:

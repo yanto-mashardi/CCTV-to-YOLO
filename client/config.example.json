@@ -36,5 +36,9 @@
       "source_status": "SIMULATION"
     }
   ],
-  "archive_env": "CCTV_GDRIVE_ARCHIVE"
+  "archive_env": "CCTV_GDRIVE_ARCHIVE",
+  "archive_path": "G:\\My Drive\\DATA KENDARAAN",
+  "inference_fps": 10,
+  "preview_fps": 5,
+  "confidence": 0.25
 }
