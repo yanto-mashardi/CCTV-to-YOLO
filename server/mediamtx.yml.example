@@ -15,25 +15,25 @@ authInternalUsers:
     pass: REPLACE_BENGKALIS_PASSWORD
     permissions:
       - action: publish
-        path: bengkalis
+        path: live/bengkalis
   - user: pakning_pub
     pass: REPLACE_PAKNING_PASSWORD
     permissions:
       - action: publish
-        path: pakning
+        path: live/pakning
   - user: campus_reader
     pass: REPLACE_READER_PASSWORD
     permissions:
       - action: read
-        path: bengkalis
+        path: live/bengkalis
       - action: read
-        path: pakning
+        path: live/pakning
 paths:
-  bengkalis:
+  live/bengkalis:
     source: publisher
     overridePublisher: no
     record: no
-  pakning:
+  live/pakning:
     source: publisher
     overridePublisher: no
     record: no
